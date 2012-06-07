@@ -23,7 +23,10 @@ do
 
     echo "Step 3: Generating the "Needles" file for $mbox"
     cat  "$MBOX_NAME-from" \
-	| awk '{ gsub('/^From\:/',"",$0); gsub('/=.*=/', "", $0); gsub('/\"/',"",$0); print $0}' \
+	| awk '{ gsub('/^From\:/',"",$0); \
+                 gsub('/=.*=/', "", $0); \
+                 gsub('/\"/',"",$0); \
+                 gsub('/^[[:space:]]*/',"",$0); print $0}' \
 	| sort -f | uniq -i > "$MBOX_NAME-needles"
 
     echo "Step 4: Generating the contributor's CSV file for $mbox"
