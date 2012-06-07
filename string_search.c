@@ -250,7 +250,7 @@ int astrip_usage(void)
 
 
 
-static int domains, strip, csv;
+static int domains, strip, csv, test;
 static char *needles, *haystack;
 
 static struct option long_options[] = {
@@ -259,6 +259,7 @@ static struct option long_options[] = {
 	{"domain", required_argument, 0, 'd'},
 	{"strip", no_argument, 0, 1},
 	{"csv", no_argument, 0, 'c'},
+	{"test", no_argument, 0, 't'},
 	{0,0,0,0}
 };
 
@@ -340,10 +341,11 @@ int amat_main(int argc, char **argv)
 		case 'c':
 			csv = 1;
 			break;
-
+		case 't':
+			test = 1;
+			break;
 		default:
 			exit (amat_usage());
-			
 		}
 	}
 
@@ -354,13 +356,20 @@ int amat_main(int argc, char **argv)
 		line = fgets(buf, 1023, needles_file);
 		if (!line)
 			break;
-		if (strlen(line) < 4)
+		if (strlen(line) < 4) {
+			if (test)
+				printf("tried to match a short line: %s\n", line);
+			
 			continue;
+		}
 		
 		/* do we need to match theaddress or just the domain? */
 		needle = get_email_address(line);
-		
+
 		if (previously_matched(needle, line)){
+			if (test)
+				printf("previously matched %s in %s", needle, line);
+			
 			free(needle);
 			continue;
  		}
@@ -370,14 +379,21 @@ int amat_main(int argc, char **argv)
  				char *nl = strrchr(line, '\n');
  				if (nl)
  					*nl = 0x00;
-				printf("\"%s\",\t%d\n", line, matches);
+				if (!test)
+					printf("\"%s\",\t%d\n", line, matches);
 			} 
-			else
-				printf("%d\t%s", matches, line);
+			else {
+				if (!test)
+					printf("%d\t%s", matches, line);
+			}
+			
 			add_matched_addr(needle, line);
 			free(needle);
+		} else {
+			if (test)
+				printf("failed to extract address from: %s\n", line);
 		}
-
+		
 	} while (line);
 	
 	if (needles && needles_file)
