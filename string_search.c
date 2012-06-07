@@ -88,17 +88,16 @@ int previously_matched(const char *addr, const char *line)
 			break;
 
  		m = strcasestr(addr, a->addr);
- 		if (m != NULL)	{
+  		if (m != NULL)	{
 			/* some lines are different but have the same address. */
 			/* we want to match lines that are the same, and not */
 			/* match lines that have the same address but are different. */
-			int no_match;
+ 			int no_match; 
 			
-			no_match = strcasecmp(a->line, line);
-			if (no_match)
+ 			no_match = strcasecmp(a->line, line);
+ 			if (no_match)
 				return 1;
 		}
-		
 		a = a->next;
 	}
 	return 0;
