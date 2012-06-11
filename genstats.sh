@@ -33,7 +33,6 @@ echo "Generating statistics for KVM for the years $@"
 
 for year in $@ ;
 do
-echo "gitstat.sh $KVM_REPO $STATS_DIR/$year/$year-kvm-devel-git.csv --since 01/01/$year --until 12/31/$year"
     gitstat.sh $KVM_REPO $STATS_DIR/$year/$year-kvm-devel-git.csv --since 01/01/$year --until 12/31/$year
 done
 
@@ -98,9 +97,7 @@ EOF
 
 for year in $@ ;
 do
-echo "gitstat.sh $QEMU_REPO $STATS_DIR/$year/$year-qemu-git.csv --since 01/01/$year --until 12/31/$year"
-    gitstat.sh $QEMU_REPO $STATS_DIR/$year/$year-qemu-git.csv --since 01/01/$year --until 12/31/$year
-#-D $GITSTATDIRSQEMU
+    gitstat.sh $QEMU_REPO $STATS_DIR/$year/$year-qemu-git.csv --since 01/01/$year --until 12/31/$year -D $GITSTATDIRSQEMU
 done
 
 popd
