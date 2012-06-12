@@ -29,7 +29,7 @@ shift
 # These are the directories we want to measure for the qemu project
 # we do not want to measure some of the platform directories, slirp, and 
 # the tiny code generator (tcg)
-echo "Preparing to run gitstats"
+echo "Preparing to run gitstats $@"
 
 pushd $GITREPO
 
@@ -54,7 +54,7 @@ echo >> $GITSTATS
 awk '{print}'  >> $GITSTATS   <<EOF
 Domain, Commits, Lines Added, Lines Removed
 EOF
-cat $GITSTATS | astrip --domain 2 >> $GITSTATS
+cat $GITSTATS | astrip --domain 3 >> $GITSTATS
 mv $GITSTATS $OUTPUT_FILE
 
 popd
