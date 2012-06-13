@@ -291,7 +291,8 @@ err_out:
 		fclose(*h);
 	*n = *h = NULL;
 	
-	exit (amat_usage());
+	printf("Error opening needle or haystack file\n");
+	exit (1);
 }
 
 
@@ -459,16 +460,175 @@ int astrip_main(int argc, char **argv)
 }
 
 
+struct git_matches {
+	struct git_matches *next;
+	char *domain;
+	int commits;
+	int added;
+	int removed;
+};
+
+static struct git_matches *gmatches;
+
+struct git_matches *new_match_node(const char *d, int c, int a, int r)
+{
+	if (d == NULL)
+		return NULL;
+	
+	struct git_matches *newg = calloc(1, sizeof(struct git_matches));
+	 if (! newg)
+		 return NULL;
+
+	 newg->domain = strdup(d);
+	 if (! newg->domain) {
+		 free(newg);
+		 return NULL;
+	 }
+	 newg->commits = c;
+	 newg->added = a;
+	 newg->removed = r;
+
+	 newg->next = gmatches;
+	 gmatches->next = newg;
+
+	 return newg;
+
+ }
+
+ struct git_matches *find_update_match_node(const char *d, int c, int a, int r)
+ {
+	 struct git_matches *searchg = gmatches;
+
+	 while (searchg != NULL) {
+		 if (strcasestr(d, searchg->domain) || 
+		     strcasestr(searchg->domain, d)) {
+			 searchg->commits += c;
+			 searchg->added += a;
+			 searchg->removed += r;
+			 return searchg;
+		 }
+		 searchg = searchg->next;
+	 }
+	 return(new_match_node(d, c, a, r));
+ }
+
+
+
+struct git_matches *commits_in_file(FILE *haystack, const char *needle)
+{
+	char buf[1024], gdomains[1024];
+	char *line, *match;
+	int commits, adds, removes;	
+	struct git_matches *commit  = NULL;
+
+	do {
+		memset(buf, 0x00, 1024);
+		line = fgets(buf, 1023, haystack);
+		if (line != NULL) {
+			match = strcasestr(line, needle);
+			if (match != NULL) {
+				int ccode = 0;
+				
+				ccode = fscanf(haystack, "%1023s, %d, %d, %d", 
+					       gdomains, &commits, &adds, &removes);
+				if (ccode == 4)
+					commit = find_update_match_node(gdomains, 
+									     commits, 
+									     adds, 
+									     removes);
+			}
+		}
+	}while (line != NULL);
+	
+	return commit;
+}
+
+
+ int gitmatch_usage(void)
+ {
+	 printf("usage: gitmatch --haystack <haystack file> --needles <needles file>\n");
+	 return 1;
+ }
+
+
+ int gitmatch_main(int argc, char **argv)
+ {
+	 int c, option_index = 0;
+	 struct git_matches *commits_for_line = NULL; 
+	 FILE *needles_file = NULL, *haystack_file = NULL;
+	 char buf [1024], *line, *needle;
+
+
+	 if (argc < 1)
+		 exit(gitmatch_usage());
+	 printf("searching for git commits by three-level domain");
+	 
+	 while (1) {
+
+		 c = getopt_long(argc, argv, "h:n:", long_options, &option_index);
+
+		 if (c == -1)
+			 break;
+		 switch(c) {
+		 case 0:
+			 break;
+		 case 'n':
+			 needles = strdup(optarg);
+			 break;
+		 case 'h':
+			 haystack = strdup(optarg);
+			 break;
+		 default:
+			 exit(gitmatch_usage());
+		 }
+	 }
+
+	 amat_check_options(&needles_file, &haystack_file);
+	 
+	 do {
+		 int ccode = 0;
+		 
+		 memset(buf, 0x00, sizeof(buf));
+		 line = fgets(buf, 1023, needles_file);
+		 if (!line)
+			 break;
+		 if (strlen(line) < 4) {
+			 if (test)
+				 printf("tried to match a short line: %s\n", line);
+			 
+			 continue;
+		 }
+		 commits_for_line = commits_in_file(haystack_file, line);
+		 if (commits_for_line) {
+			 if (csv)
+				 printf("\"%s\", %d, %%d, %d\n", 
+					commits_for_line->domain, 
+					commits_for_line->commits,
+					commits_for_line->added,
+					commits_for_line->removed);
+			 else
+				 printf("%s\t%d\t%%d\t%d\n",
+					commits_for_line->domain, 
+					commits_for_line->commits,
+					commits_for_line->added,
+					commits_for_line->removed);
+		 }
+	 } while (line);
+	 
+	 exit(0);
+}
+
 
 int main(int argc, char **argv)
 {
 	int err;
-	
 
-	if (! strcasestr(argv[0], "astrip"))
-		err = amat_main(argc, argv);
-	else
+	if (strcasestr(argv[0], "gitmatch"))
+		err = gitmatch_main(argc, argv);
+	else if (strcasestr(argv[0], "astrip"))
 		err = astrip_main(argc, argv);
+	else
+		err = amat_main(argc, argv);
 	
         /* free needles, haystack */
 
