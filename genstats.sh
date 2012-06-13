@@ -4,6 +4,16 @@
 # projects. Totally hard-coded. Edit the directories, repository locations, and 
 # file names for a different project.
 
+
+#####
+# prepare haystack and needle for gitmatch
+# break git domain csv into a separate file from git contributions csv
+# strip commas, strip numbers, sort | uniq > git domain needles
+# strip commas from git domain csv to generate haystack
+# $ cat 2008-kvm-devel-git.csv | awk '{gsub('/\,/', ""); print $0}' > 2008-kvm-devel-git.csv
+#####    emcraft.com 3 41 19
+
+
 KVM_REPO="/Users/mdday/src/kvm"
 QEMU_REPO="/Users/mdday/src/qemu"
 STATS_DIR="/Users/mdday/src/kvm-community-analysis"

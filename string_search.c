@@ -489,7 +489,7 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
 	 newg->removed = r;
 
 	 newg->next = gmatches;
-	 gmatches->next = newg;
+	 gmatches = newg;
 
 	 return newg;
 
@@ -514,58 +514,43 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
 
 
 
-struct git_matches *commits_in_file(FILE *haystack, const char *needle)
+struct git_matches *commits_in_file(const char *haystack, 
+				    const char *needle,
+				    int commits, int adds, int removes)
 {
-	char buf[1024], gdomains[1024];
-	char *line, *match;
-	int commits, adds, removes;	
 	struct git_matches *commit  = NULL;
 
-	do {
-		memset(buf, 0x00, 1024);
-		line = fgets(buf, 1023, haystack);
-		if (line != NULL) {
-			match = strcasestr(line, needle);
-			if (match != NULL) {
-				int ccode = 0;
-				
-				ccode = fscanf(haystack, "%1023s, %d, %d, %d", 
-					       gdomains, &commits, &adds, &removes);
-				if (ccode == 4)
-					commit = find_update_match_node(gdomains, 
-									     commits, 
-									     adds, 
-									     removes);
-			}
-		}
-	}while (line != NULL);
-	
+	if (NULL != strcasestr(haystack, needle))
+		commit = find_update_match_node(needle, 
+						commits, 
+						adds, 
+						removes);
 	return commit;
 }
 
 
  int gitmatch_usage(void)
  {
-	 printf("usage: gitmatch --haystack <haystack file> --needles <needles file>\n");
+	 printf("usage: gitmatch --haystack <haystack file> --needles <needles file> --csv\n");
 	 return 1;
  }
 
 
  int gitmatch_main(int argc, char **argv)
  {
-	 int c, option_index = 0;
+	 int c, option_index = 0, ccode_inner = 0, ccode_outer = 0;
+	 int commits, adds, removes;
 	 struct git_matches *commits_for_line = NULL; 
 	 FILE *needles_file = NULL, *haystack_file = NULL;
-	 char buf [1024], *line, *needle;
+	 char haystack_buf[1024], *line, needle[1024];
 
 
 	 if (argc < 1)
 		 exit(gitmatch_usage());
-	 printf("searching for git commits by three-level domain");
 	 
 	 while (1) {
 
-		 c = getopt_long(argc, argv, "h:n:", long_options, &option_index);
+		 c = getopt_long(argc, argv, "h:n:c", long_options, &option_index);
 
 		 if (c == -1)
 			 break;
@@ -578,46 +563,63 @@ struct git_matches *commits_in_file(FILE *haystack, const char *needle)
 		 case 'h':
 			 haystack = strdup(optarg);
 			 break;
+		 case 'c':
+			 csv = 1;
+			 break;
 		 default:
 			 exit(gitmatch_usage());
 		 }
 	 }
 
 	 amat_check_options(&needles_file, &haystack_file);
-	 
+
 	 do {
-		 int ccode = 0;
-		 
-		 memset(buf, 0x00, sizeof(buf));
-		 line = fgets(buf, 1023, needles_file);
-		 if (!line)
+		 memset(needle, 0x00, sizeof(needle));
+		 ccode_outer  = fscanf(needles_file, "%1023s", needle);
+		 if (ccode_outer == EOF)
 			 break;
-		 if (strlen(line) < 4) {
-			 if (test)
-				 printf("tried to match a short line: %s\n", line);
-			 
+		 if (!ccode_outer)
 			 continue;
-		 }
-		 commits_for_line = commits_in_file(haystack_file, line);
-		 if (commits_for_line) {
-			 if (csv)
-				 printf("\"%s\", %d, %%d, %d\n", 
-					commits_for_line->domain, 
-					commits_for_line->commits,
-					commits_for_line->added,
-					commits_for_line->removed);
-			 else
-				 printf("%s\t%d\t%%d\t%d\n",
-					commits_for_line->domain, 
-					commits_for_line->commits,
-					commits_for_line->added,
-					commits_for_line->removed);
-		 }
-	 } while (line);
+
+		 do {
+			 memset(haystack_buf, 0x00, sizeof(haystack_buf));
+			 ccode_inner  = fscanf(haystack_file, "%1023s%d%d%d", 
+			       haystack_buf, &commits, &adds, &removes);
+			 if (ccode_inner == EOF)
+				 break;
+			 if (ccode_inner != 4)
+				 continue;
+			 commits_for_line = commits_in_file(haystack_buf, 
+							    needle,
+							    commits,
+							    adds,
+							    removes);
+		 } while (ccode_inner != EOF);
+		 /* seek to the beginning of the haystack file */
+		 fseek(haystack_file, 0, SEEK_SET);
+	 } while (ccode_outer  != EOF);
 	 
+	 /* now print the consolidated totals */
+	 commits_for_line = gmatches;
+	 
+
+	 while (commits_for_line) {
+		 if (csv)
+			 printf("\"%s\", %d, %d, %d\n", 
+				commits_for_line->domain, 
+				commits_for_line->commits,
+				commits_for_line->added,
+				commits_for_line->removed);
+		 else
+			 printf("%s\t%d\t%d\t%d\n",
+				commits_for_line->domain, 
+				commits_for_line->commits,
+				commits_for_line->added,
+				commits_for_line->removed);
+		 commits_for_line = commits_for_line->next;
+	 } 
 	 exit(0);
 }
-
 
 int main(int argc, char **argv)
 {
