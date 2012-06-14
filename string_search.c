@@ -498,18 +498,35 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
  struct git_matches *find_update_match_node(const char *d, int c, int a, int r)
  {
 	 struct git_matches *searchg = gmatches;
-
+	 char *search_domain = strdup(d);
+	 if (!search_domain)
+		 return NULL;
+	 
+	 /* a little hack to collapse .com domains back to two levels */
+	 char *com = strcasestr(d, ".com");
+	 if (com != NULL) {
+		 /* is this a three-level .com domain? */
+		 char *dot = strchr(d, '.');
+		 if (dot && dot != com) {
+			 /* yes, a three-level domain */
+			 search_domain = dot + 1;
+		 }
+	 }
+	 
 	 while (searchg != NULL) {
-		 if (strcasestr(d, searchg->domain) || 
-		     strcasestr(searchg->domain, d)) {
+		 if (strcasestr(search_domain, searchg->domain) || 
+		     strcasestr(searchg->domain, search_domain)) {
 			 searchg->commits += c;
 			 searchg->added += a;
 			 searchg->removed += r;
+			 free(search_domain);
 			 return searchg;
 		 }
 		 searchg = searchg->next;
 	 }
-	 return(new_match_node(d, c, a, r));
+	 searchg = new_match_node(search_domain, c, a, r);
+	 free(search_domain);
+	 return searchg;
  }
 
 
