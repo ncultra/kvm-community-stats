@@ -498,7 +498,7 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
  struct git_matches *find_update_match_node(const char *d, int c, int a, int r)
  {
 	 struct git_matches *searchg = gmatches;
-	 char *search_domain = strdup(d);
+	 char *sd, *search_domain = strdup(d);
 	 if (!search_domain)
 		 return NULL;
 	 
@@ -509,13 +509,13 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
 		 char *dot = strchr(d, '.');
 		 if (dot && dot != com) {
 			 /* yes, a three-level domain */
-			 search_domain = dot + 1;
+			 sd = dot + 1;
 		 }
 	 }
 	 
 	 while (searchg != NULL) {
-		 if (strcasestr(search_domain, searchg->domain) || 
-		     strcasestr(searchg->domain, search_domain)) {
+		 if (strcasestr(sd, searchg->domain) || 
+		     strcasestr(searchg->domain, sd)) {
 			 searchg->commits += c;
 			 searchg->added += a;
 			 searchg->removed += r;
@@ -524,7 +524,7 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
 		 }
 		 searchg = searchg->next;
 	 }
-	 searchg = new_match_node(search_domain, c, a, r);
+	 searchg = new_match_node(sd, c, a, r);
 	 free(search_domain);
 	 return searchg;
  }
