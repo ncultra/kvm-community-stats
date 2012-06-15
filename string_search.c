@@ -501,12 +501,13 @@ struct git_matches *new_match_node(const char *d, int c, int a, int r)
 	 char *sd, *search_domain = strdup(d);
 	 if (!search_domain)
 		 return NULL;
+	 sd = search_domain;
 	 
 	 /* a little hack to collapse .com domains back to two levels */
-	 char *com = strcasestr(d, ".com");
+	 char *com = strcasestr(sd, ".com");
 	 if (com != NULL) {
 		 /* is this a three-level .com domain? */
-		 char *dot = strchr(d, '.');
+		 char *dot = strchr(sd, '.');
 		 if (dot && dot != com) {
 			 /* yes, a three-level domain */
 			 sd = dot + 1;
