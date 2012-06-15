@@ -41,9 +41,25 @@ git reset --hard origin/master
 
 echo "Generating statistics for KVM for the years $@"
 
+
+GITSTATDIRSKVM=$(mktemp /tmp/gitstatdirs.XXXXXXXXXX)
+
+cat > $GITSTATDIRSKVM <<EOF
+virt
+arch/x86/kvm
+drivers/virt
+drivers/virtio
+drivers/vhost
+
+EOF
+
+
+
 for year in $@ ;
 do
-    gitstat.sh $KVM_REPO $STATS_DIR/$year/$year-kvm-devel-git.csv --since 01/01/$year --until 12/31/$year
+    gitstat.sh $KVM_REPO $STATS_DIR/$year/$year-kvm-devel-git.csv \
+	$STATS_DIR/$year/$year-kvm-devel-dom-git.csv \
+	--since 01/01/$year --until 12/31/$year -D $GITSTATDIRSKVM
 done
 
 popd
@@ -107,7 +123,9 @@ EOF
 
 for year in $@ ;
 do
-    gitstat.sh $QEMU_REPO $STATS_DIR/$year/$year-qemu-git.csv --since 01/01/$year --until 12/31/$year -D $GITSTATDIRSQEMU
+    gitstat.sh $QEMU_REPO $STATS_DIR/$year/$year-qemu-devel-git.csv \
+	$STATS_DIR/$year/$year-qemu-devel-dom-git.csv \
+	--since 01/01/$year --until 12/31/$year  -D $GITSTATDIRSQEMU
 done
 
 popd
