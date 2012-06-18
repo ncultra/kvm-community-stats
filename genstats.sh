@@ -47,9 +47,15 @@ GITSTATDIRSKVM=$(mktemp /tmp/gitstatdirs.XXXXXXXXXX)
 cat > $GITSTATDIRSKVM <<EOF
 virt
 arch/x86/kvm
+arch/s390/kvm
+arch/powerpc/kvm
 drivers/virt
 drivers/virtio
 drivers/vhost
+drivers/s390/kvm
+arch/x86/kernel/kvmclock.c
+tools/perf/builtin-kvm.c
+arch/x86/kernel/kvm.c
 
 EOF
 

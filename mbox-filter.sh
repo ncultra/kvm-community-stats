@@ -22,12 +22,17 @@ do
                  gsub('/^[[:space:]]*/',"",$0); print $0}' \
 	| sort -f | uniq -i > "$MBOX_NAME-needles"
 
+
+    awk '{print}' > "$MBOX_NAME-contributors.csv" <<EOF
+Contributor, Messages
+EOF
+
     echo "Step 3: Generating the contributor's CSV file for $mbox"
     cat "$MBOX_NAME-needles" \
 	|  awk '{ gsub('/^From\:/',"",$0) ; \
                  gsub('/^[[:space:]]{1}/',"",$0); \
                  gsub('/\"/',"",$0); print $0}' \
-	| amat --csv --haystack "$MBOX_NAME-from" > "$MBOX_NAME-contributors.csv"
+	| amat --csv --haystack "$MBOX_NAME-from" >> "$MBOX_NAME-contributors.csv"
 
     echo "Step 4: Generating list of unique two-level domains for $mbox"
     cat "$MBOX_NAME-from" | astrip --domain 2 | sort -fb > "$MBOX_NAME-from-dom"
@@ -36,13 +41,18 @@ do
     cat  "$MBOX_NAME-from-dom" | sort -f | uniq -i > "$MBOX_NAME-needles-dom"
 
     echo "Step 6: Generating the CSV file per two-level domain for $mbox"
+   
+
+    awk '{print}' > "$MBOX_NAME-domain.csv" <<EOF
+Domain, Messages
+EOF
+
     cat "$MBOX_NAME-needles-dom" \
 	|  awk '{ gsub('/^From\:/',"",$0) ; \
                  gsub('/^[[:space:]]{1}/',"",$0); \
                  gsub('/\"/',"",$0); print $0}' \
-	| amat --csv --domain 2 --haystack "$MBOX_NAME-from-dom" > "$MBOX_NAME-domain.csv"
+	| amat --csv --domain 2 --haystack "$MBOX_NAME-from-dom" >> "$MBOX_NAME-domain.csv"
 
 done
-
 
 exit 1
