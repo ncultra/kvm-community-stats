@@ -54,8 +54,17 @@ drivers/virtio
 drivers/vhost
 drivers/s390/kvm
 arch/x86/kernel/kvmclock.c
-tools/perf/builtin-kvm.c
 arch/x86/kernel/kvm.c
+tools/perf/builtin-kvm.c
+include/trace/events/kvm.h
+include/linux/kvm_para.h
+include/asm-generic/kvm_para.h
+include/linux/kvm_types.h
+include/linux/kvm.h
+arch/x86/include/asm/kvm_emulate.h
+arch/x86/include/asm/kvm_host.h
+arch/x86/include/asm/kvm_para.h
+arch/x86/include/asm/kvm.h
 
 EOF
 
