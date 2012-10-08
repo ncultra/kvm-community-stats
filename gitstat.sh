@@ -56,4 +56,4 @@ EOF
 echo "running gitmatch"
 gitmatch --haystack $GITSTATHAYSTACK --needles $GITSTATNEEDLE --csv | sort -fb >> $OUTPUT_FILE_DOM
 
-popd
+Popd

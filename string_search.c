@@ -1,5 +1,5 @@
 /*****************************************************************
- *  copyright (c) 2010, Michael D. Day
+ *  copyright (c) 2010-2012, Michael D. Day
  *
  *  This work is licensed under the GNU GPL, version 2. See 
  *  http://www.gnu.org/licenses/gpl-2.0.txt
