@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-
 # the gistat program parses the output of git log and reports on the
 # changes it finds.  It gives a summary of commits done by specific people
 # including the number of lines changed and the number of changes they made.
 #
 # usage gitstat [options] <git rev range>
 #
+
 import sys
 import os
 import re
