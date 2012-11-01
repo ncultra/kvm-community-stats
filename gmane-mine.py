@@ -68,8 +68,6 @@ parser.add_argument("--start", help="starting date <yyyymmdd>",
                     metavar="<yyyymmdd>")
 parser.add_argument("--end", help="ending date <yyyymmdd>", 
                     metavar = "<yyyymmdd>")
-#parser.add_argument("--year", required=False, help="download a year of messages", 
-#                    metavar = "<yyyy>", action = 'store_true')
 parser.add_argument("--year", metavar="<yyyy>")
 
 
@@ -79,7 +77,10 @@ args = vars(parser.parse_args())
 if args["year"] is not None:
     for i in range(1,13):
         start_id = get_msg_id(args["list"][0], args["year"] + str(i).rjust(2, "0") + "01")
-        end_id = get_msg_id(args["list"][0], args["year"] + str(i+1).rjust(2, "0") + "01")
+        if i == 12:
+            end_id = get_msg_id(args["list"][0], args["year"] + str(i).rjust(2, "0") + "32")
+        else:
+            end_id = get_msg_id(args["list"][0], args["year"] + str(i+1).rjust(2, "0") + "01")
         download_messages(args["list"][0], start_id, end_id)
         time.sleep(1)
 else:
