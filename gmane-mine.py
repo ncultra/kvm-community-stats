@@ -76,13 +76,12 @@ parser.add_argument("--year", metavar="<yyyy>")
 # convert to a dict. 
 args = vars(parser.parse_args())
 
-if args["year"]:
-    for i in range(12):
+if args["year"] is not None:
+    for i in range(1,13):
         start_id = get_msg_id(args["list"][0], args["year"] + str(i).rjust(2, "0") + "01")
         end_id = get_msg_id(args["list"][0], args["year"] + str(i+1).rjust(2, "0") + "01")
         download_messages(args["list"][0], start_id, end_id)
-        sys.sleep(1) 
-
+        time.sleep(1)
 else:
     start_id = get_msg_id(args["list"][0], args["start"])
     end_id = get_msg_id(args["list"][0], args["end"])
