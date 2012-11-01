@@ -39,14 +39,9 @@ def download_messages(list, start_id, end_id):
     fp = urllib.urlopen(url)
     try:
         data = fp.readline()
-        count = 1
         while data:
             sys.stdout.write(data)
             data = fp.readline()
-            count += 1
-            if not  count % 1000:
-                if args["throttle"] is True:
-                    time.sleep(1)
     finally:
         fp.close()
 
@@ -55,11 +50,10 @@ parser = argparse.ArgumentParser(description = "Mine gmane for mbox archive.")
 parser.add_argument("--list", nargs=1, required=True, help="gmane list name", 
                     metavar="list name")
 parser.add_argument("--start", required=True, help="starting date <yyyymmdd>", 
-                    metavar="start")
+                    metavar="<yyyymmdd>")
 parser.add_argument("--end", required=True, help="ending date <yyyymmdd>", 
-                    metavar = "end")
-parser.add_argument("--throttle", help="throttle the download so gname doesn't cut off the session.", 
-                    action="store_true")
+                    metavar = "<yyyymmdd>")
+
 # convert to a dict. 
 args = vars(parser.parse_args())
 
