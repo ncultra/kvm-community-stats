@@ -3,6 +3,21 @@
 '''
 download an mbox archive from gmane
 
+gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd
+
+   where <listname> is the gmane name of the list. For example, 
+   gmane.comp.emulators.qemu is the gmane name of the qemu mailing list. 
+   
+   --start and --end are the beginning and ending (non-inclusive) of
+     the date range in yyyymmdd format. For example, July 4, 1961 is
+     19610704
+
+     Here's an example showing how to download qemu messages from
+     January 1, 2008 through January 9, 2008:
+
+      gmane-mine.py --list gmane.comp.emulators.qemu --start 20080101 \
+         --end 20080110
+
 '''
 
 import argparse, urllib, re, urlparse, time, sys
