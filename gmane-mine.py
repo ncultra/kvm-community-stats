@@ -64,15 +64,26 @@ def download_messages(list, start_id, end_id):
 parser = argparse.ArgumentParser(description = "Mine gmane for mbox archive.")
 parser.add_argument("--list", nargs=1, required=True, help="gmane list name", 
                     metavar="list name")
-parser.add_argument("--start", required=True, help="starting date <yyyymmdd>", 
+parser.add_argument("--start", help="starting date <yyyymmdd>", 
                     metavar="<yyyymmdd>")
-parser.add_argument("--end", required=True, help="ending date <yyyymmdd>", 
+parser.add_argument("--end", help="ending date <yyyymmdd>", 
                     metavar = "<yyyymmdd>")
+#parser.add_argument("--year", required=False, help="download a year of messages", 
+#                    metavar = "<yyyy>", action = 'store_true')
+parser.add_argument("--year", metavar="<yyyy>")
+
 
 # convert to a dict. 
 args = vars(parser.parse_args())
 
-start_id = get_msg_id(args["list"][0], args["start"])
-end_id = get_msg_id(args["list"][0], args["end"])
+if args["year"]:
+    for i in range(12):
+        start_id = get_msg_id(args["list"][0], args["year"] + str(i).rjust(2, "0") + "01")
+        end_id = get_msg_id(args["list"][0], args["year"] + str(i+1).rjust(2, "0") + "01")
+        download_messages(args["list"][0], start_id, end_id)
+        sys.sleep(1) 
 
-download_messages(args["list"][0], start_id, end_id)
+else:
+    start_id = get_msg_id(args["list"][0], args["start"])
+    end_id = get_msg_id(args["list"][0], args["end"])
+    download_messages(args["list"][0], start_id, end_id)
