@@ -3,27 +3,6 @@
 '''
 download an mbox archive from gmane
 
-1) find first permalink
-
-2) extract url
-import re
-match = re.search(r'href=[\'"]?([^\'" >]+)', s)
-if match:
-    print match.group(0)
-3 split and get message id
-
-import urlparse
-url = "http://example/url/being/used/to/show/problem"
-parsed = urlparse.urlparse(url)
-path = parsed[2] #this is the path element
-
-pathlist = path.split("/")
-I get the list:
-
-['', 'url', 'being', 'used', 'to', 'show', 'problem']
-
-
-
 '''
 
 import argparse, urllib, re, urlparse, time, sys
