@@ -20,17 +20,18 @@ gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd
 
 '''
 
-import argparse, urllib, re, urlparse, time, sys
+import argparse, urllib, re, urlparse, time, sys, nntplib, email
 
 url_base = "http://blog.gmane.org/"
 export_base = "http://download.gmane.org/"    #<list>/851/855
 
 def get_msg_id(list, date):
     url = url_base + list + "/" + "day=" + date
-    
+    perm_url = ""
     fp = urllib.urlopen(url)
     try:
         data = fp.readline()
+#        sys.stdout.write(data)
         while data:
             match = re.search(r'href=\"http://permalink.gmane.org/([^\'" >]+)', data)
             if match:
@@ -48,9 +49,8 @@ def get_msg_id(list, date):
     else:
         return 0
 
-
-def download_messages(list, start_id, end_id):
-    url = export_base + list + "/" + start_id + "/" + end_id
+def download_messages_http(list, start_id, end_id):
+    url = export_base + list + "/" + str(start_id) + "/" + str(end_id)
     fp = urllib.urlopen(url)
     try:
         data = fp.readline()
@@ -61,6 +61,34 @@ def download_messages(list, start_id, end_id):
         fp.close()
 
 
+def download_messages_nntp(list, start_id, end_id):
+
+    server=nntplib.NNTP("news.gmane.org")
+    try:
+        response, count, first, last, name = server.group(list)
+        current = int(start_id)
+        end = int(end_id)
+        max = int(end_id)
+        while current < end and max  <= last:
+            try:
+                _, _, _, head = (server.head(str(current)))
+                _, _, _, body = (server.body(str(current)))
+                msg = email.message_from_string('\n'.join(head + body))
+                print msg
+            except nntplib.NNTPTemporaryError:
+                pass
+            current += 1
+    finally:
+        server.quit()
+    return 0
+
+
+def download_messages(list, start_id, end_id):
+    if args["nntp"] is True:
+        return download_messages_nntp(list, start_id, end_id)
+    else:
+        return download_messages_http(list, start_id, end_id)
+
 parser = argparse.ArgumentParser(description = "Mine gmane for mbox archive.")
 parser.add_argument("--list", nargs=1, required=True, help="gmane list name", 
                     metavar="list name")
@@ -69,11 +97,10 @@ parser.add_argument("--start", help="starting date <yyyymmdd>",
 parser.add_argument("--end", help="ending date <yyyymmdd>", 
                     metavar = "<yyyymmdd>")
 parser.add_argument("--year", metavar="<yyyy>")
-
+parser.add_argument("--nntp", action="store_true")
 
 # convert to a dict. 
 args = vars(parser.parse_args())
-
 if args["year"] is not None:
     for i in range(1,13):
         start_id = get_msg_id(args["list"][0], args["year"] + str(i).rjust(2, "0") + "01")
