@@ -3,7 +3,7 @@
 '''
 download an mbox archive from gmane
 
-gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd
+gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd --year <year> --nntp
 
    where <listname> is the gmane name of the list. For example, 
    gmane.comp.emulators.qemu is the gmane name of the qemu mailing list. 
@@ -11,6 +11,10 @@ gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd
    --start and --end are the beginning and ending (non-inclusive) of
      the date range in yyyymmdd format. For example, July 4, 1961 is
      19610704
+
+   --year 2008 will download all messages from 2008
+
+   --nntp uses the gmane nntp server to download messages
 
      Here's an example showing how to download qemu messages from
      January 1, 2008 through January 9, 2008:
