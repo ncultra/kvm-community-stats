@@ -1,6 +1,14 @@
 #!/usr/bin/python
 
 '''
+/*****************************************************************
+ *  copyright (c) 2012, Michael D. Day
+ *
+ *  This work is licensed under the GNU GPL, version 2. See 
+ *  http://www.gnu.org/licenses/gpl-2.0.txt
+ *
+ ****************************************************************/
+
 download an mbox archive from gmane
 
 gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd --year <year> --nntp
@@ -35,7 +43,6 @@ def get_msg_id(list, date):
     fp = urllib.urlopen(url)
     try:
         data = fp.readline()
-#        sys.stdout.write(data)
         while data:
             match = re.search(r'href=\"http://permalink.gmane.org/([^\'" >]+)', data)
             if match:
