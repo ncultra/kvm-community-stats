@@ -19,6 +19,8 @@ gmane-mine.py --list <listname> --start yyyymmdd --end yyyymmdd --year <year> --
    --start and --end are the beginning and ending (non-inclusive) of
      the date range in yyyymmdd format. For example, July 4, 1961 is
      19610704
+     
+   --now is shorthand for the current latest message ID 
 
    --year 2008 will download all messages from 2008
 
@@ -37,8 +39,11 @@ import argparse, urllib, re, urlparse, time, sys, nntplib, email
 url_base = "http://blog.gmane.org/"
 export_base = "http://download.gmane.org/"    #<list>/851/855
 
-def get_msg_id(list, date):
-    url = url_base + list + "/" + "day=" + date
+def get_msg_id(list, date="now"):
+    if date is "now":
+        url = url_base + list
+    else:
+        url = url_base + list + "/" + "day=" + date
     perm_url = ""
     fp = urllib.urlopen(url)
     try:
@@ -105,7 +110,7 @@ parser.add_argument("--list", nargs=1, required=True, help="gmane list name",
                     metavar="list name")
 parser.add_argument("--start", help="starting date <yyyymmdd>", 
                     metavar="<yyyymmdd>")
-parser.add_argument("--end", help="ending date <yyyymmdd>", 
+parser.add_argument("--end", help="ending date <yyyymmdd> or 'now' for up-to-the-minute", 
                     metavar = "<yyyymmdd>")
 parser.add_argument("--year", metavar="<yyyy>")
 parser.add_argument("--nntp", action="store_true")
